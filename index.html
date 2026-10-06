@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kenali Marka Jalan</title>
+<style>
+:root{--aspal:#262a30;--putih:#f6f5ef;--kuning:#f2b705;--biru:#0b4f9c;--merah:#c8102e;--hijau:#1b8a4b;--bg:#eef1f5;--ink:#1a1d22}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Trebuchet MS",Verdana,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+header{background:var(--aspal);color:var(--putih);padding:28px 20px 0;position:relative;overflow:hidden}
+header h1{margin:0;font-size:clamp(2rem,6vw,3.4rem);letter-spacing:-1px}
+header p{margin:6px 0 22px;max-width:560px;color:#cfd3da}
+header::after{content:"";display:block;height:10px;background:repeating-linear-gradient(90deg,var(--putih) 0 40px,transparent 40px 70px);margin:0 -20px}
+nav{display:flex;gap:6px;flex-wrap:wrap;padding:14px 20px;background:#fff;border-bottom:1px solid #d5dae1;position:sticky;top:0;z-index:5}
+nav button{font:inherit;font-weight:bold;border:2px solid var(--biru);background:#fff;color:var(--biru);padding:8px 14px;border-radius:8px;cursor:pointer}
+nav button.on{background:var(--biru);color:#fff}
+main{max-width:860px;margin:0 auto;padding:22px 16px 60px}
+h2{margin:0 0 4px}
+.sub{color:#555;margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.tile{border:3px solid transparent;border-radius:10px;padding:0;background:none;cursor:pointer;font:inherit;text-align:center}
+.tile svg{width:100%;display:block;border-radius:8px}
+.tile span{display:block;font-size:.85rem;font-weight:bold;padding:6px 2px}
+.tile:hover,.tile:focus-visible,.tile.sel{border-color:var(--kuning);outline:none}
+.tile.ok{border-color:var(--hijau)}.tile.no{border-color:var(--merah)}
+.panel{background:#fff;border-radius:12px;padding:18px;margin-top:18px;border-left:8px solid var(--kuning);box-shadow:0 1px 3px #0002}
+.panel h3{margin:0 0 6px}
+.aksi{background:#fff7d6;border-radius:8px;padding:10px 12px;margin-top:10px}
+.scene{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.scene svg{width:200px;border-radius:12px;flex:none}
+.opts{display:grid;gap:10px;flex:1;min-width:240px}
+.opt{font:inherit;text-align:left;padding:12px 14px;border:2px solid #b9c1cc;background:#fff;border-radius:10px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--biru)}
+.opt.ok{background:#dff4e6;border-color:var(--hijau)}.opt.no{background:#fde3e6;border-color:var(--merah)}
+.bar{height:8px;background:#d5dae1;border-radius:4px;margin-bottom:16px}
+.bar i{display:block;height:100%;background:var(--biru);border-radius:4px;transition:width .3s}
+.next{margin-top:14px;font:inherit;font-weight:bold;background:var(--biru);color:#fff;border:0;padding:10px 18px;border-radius:8px;cursor:pointer}
+.fb{margin-top:12px;font-weight:bold}
+.good{color:var(--hijau)}.bad{color:var(--merah)}
+.big{font-size:2.4rem;font-weight:bold;margin:6px 0}
+footer{text-align:center;font-size:.8rem;color:#667;padding:0 16px 30px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.lang{position:absolute;top:14px;right:14px;display:flex;border:2px solid var(--putih);border-radius:8px;overflow:hidden}
+.lang button{font:inherit;font-weight:bold;font-size:.85rem;background:transparent;color:var(--putih);border:0;padding:6px 12px;cursor:pointer}
+.lang button.on{background:var(--kuning);color:#1a1d22}
+header h1{padding-right:110px}
+</style>
+</head>
+<body>
+<header>
+  <div class="lang" role="group" aria-label="Language"><button data-l="id">ID</button><button data-l="en">EN</button></div>
+  <h1 id="h1"></h1>
+  <p id="tag"></p>
+</header>
+<nav id="nav"></nav>
+<main id="app"></main>
+<footer id="foot"></footer>
+
+<script>
+/* ============ BAHASA / LANGUAGE ============ */
+let L="id",tab="jelajah";
+try{const s=localStorage.getItem("lang");if(s==="en"||s==="id")L=s}catch(e){}
+const UI={
+id:{title:"Kenali Marka Jalan",tag:"Belajar arti marka jalan di Indonesia: dari garis di tengah jalan sampai zebra cross.",
+ tabs:["Jelajahi","Simulator","Cari Marka","Kuis Akhir"],
+ jT:"Jelajahi marka jalan",jS:"Ketuk sebuah marka untuk melihat artinya.",todo:"Yang sebaiknya dilakukan:",
+ sT:"Simulator berkendara",sS:"Kamu melaju di jalan. Di depan ada marka. Apa artinya?",ok:"Benar!",no:"Belum tepat.",
+ itis:n=>` Ini ${n}.`,nd:"Lanjut berkendara",sr:"Lihat hasil",tripDone:"Perjalanan selesai",perfect:"Sempurna. Kamu siap membaca semua marka ini di jalan.",retry:"Coba lagi untuk mengingat marka yang masih keliru.",again:"Berkendara lagi",
+ cT:"Cari marka",cS:"Ketuk marka yang tepat.",ans:n=>` Jawabannya: ${n}.`,nq:"Soal berikutnya",fin:"Selesai",pa:"Main lagi",
+ kT:"Kuis akhir",qn:(a,b)=>`Soal ${a}/${b}`,sc:"Skor",res:"Hasil",plus:"Benar! +10.0",wrongR:r=>"Salah. Jawaban benar: "+r,hint:"Petunjuk",rs:"Ulangi",nx:"Berikutnya",seeRes:"Lihat hasil",
+ m:["Kamu perlu belajar lebih banyak, tanyakan temanmu demi keselamatanmu sendiri","Masih perlu belajar soal marka jalan, tapi kamu sudah bagus!","Kamu hebat, ajari temanmu tentang marka jalan!"],
+ foot:"Acuan: PM Perhubungan No. 34 Tahun 2014 tentang Marka Jalan beserta perubahannya (PM 67 Tahun 2018). Cocokkan isi dengan teks resmi sebelum dikumpulkan."},
+en:{title:"Know Your Road Markings",tag:"Learn what Indonesian road markings mean: from the center line to the zebra crossing.",
+ tabs:["Explore","Simulator","Find the Marking","Final Quiz"],
+ jT:"Explore road markings",jS:"Tap a marking to see what it means.",todo:"What you should do:",
+ sT:"Driving simulator",sS:"You are driving along. A marking appears ahead. What does it mean?",ok:"Correct!",no:"Not quite.",
+ itis:n=>` This is a ${n}.`,nd:"Keep driving",sr:"See result",tripDone:"Trip complete",perfect:"Perfect. You are ready to read all of these markings on the road.",retry:"Try again to remember the markings you missed.",again:"Drive again",
+ cT:"Find the marking",cS:"Tap the correct marking.",ans:n=>` The answer: ${n}.`,nq:"Next question",fin:"Finished",pa:"Play again",
+ kT:"Final quiz",qn:(a,b)=>`Question ${a}/${b}`,sc:"Score",res:"Result",plus:"Correct! +10.0",wrongR:r=>"Wrong. Right answer: "+r,hint:"Hint",rs:"Restart",nx:"Next",seeRes:"See result",
+ m:["You need to learn more, ask your friend for your own safety","Still need learning about street mark, but you did well !","You did well, teach your friend about them"],
+ foot:"Reference: Ministry of Transportation Regulation No. 34 of 2014 on Road Markings and its amendment (PM 67 of 2018). Mari terapkan pengetahuan ini di jalan ."}
+};
+const S=()=>UI[L];
+
+/* ============ DATA MARKA ============ */
+const R=(x,y,w,h,c="#f6f5ef")=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
+const dash=(x,w,c)=>R(x,4,w,26,c)+R(x,47,w,26,c)+R(x,90,w,26,c);
+const MARKA=[
+ {id:"utuh",gambar:R(57,0,6,120),
+  id_:{nama:"Garis utuh",arti:"Dilarang melintasi atau mendahului",cari:"Pengemudi dilarang mendahului atau melintasi garis ini",aksi:"Tetap di lajurmu dan jangan menyalip, walaupun jalan terlihat sepi."},
+  en_:{nama:"Solid line",arti:"No crossing or overtaking",cari:"Drivers may not overtake or cross this line",aksi:"Stay in your lane and do not overtake, even if the road looks empty."}},
+ {id:"putus",gambar:dash(57,6,"#f6f5ef"),
+  id_:{nama:"Garis putus-putus",arti:"Boleh mendahului jika aman",cari:"Pengemudi boleh mendahului jika kondisi jalan aman",aksi:"Pastikan jalur depan kosong dan jarak pandang cukup sebelum menyalip."},
+  en_:{nama:"Dashed line",arti:"Overtaking allowed when safe",cari:"Drivers may overtake if the road is clear and safe",aksi:"Make sure the lane ahead is clear and visibility is good before overtaking."}},
+ {id:"ganda",gambar:R(51,0,5,120)+R(64,0,5,120),
+  id_:{nama:"Garis ganda utuh",arti:"Larangan melintasi dan mendahului dari kedua arah",cari:"Dua garis utuh sejajar: tidak boleh menyalip dari arah mana pun",aksi:"Ikuti kendaraan di depan dengan sabar sampai marka berubah."},
+  en_:{nama:"Double solid line",arti:"No crossing or overtaking from either direction",cari:"Two parallel solid lines: no overtaking from any direction",aksi:"Follow the vehicle ahead patiently until the marking changes."}},
+ {id:"campur",gambar:R(51,0,5,120)+dash(64,5,"#f6f5ef"),
+  id_:{nama:"Garis utuh + putus-putus",arti:"Boleh mendahului hanya dari sisi garis putus-putus",cari:"Hanya kendaraan di sisi garis putus-putus yang boleh mendahului",aksi:"Lihat sisi mana garis putus-putus berada. Jika di sisimu, kamu boleh menyalip dengan aman."},
+  en_:{nama:"Solid + dashed line",arti:"Overtaking only from the dashed-line side",cari:"Only vehicles on the dashed-line side may overtake",aksi:"Check which side the dashed line is on. If it is on your side, you may overtake safely."}},
+ {id:"zebra",gambar:[0,1,2,3,4,5].map(i=>R(9+i*18,28,11,64)).join(""),
+  id_:{nama:"Zebra cross",arti:"Tempat penyeberangan pejalan kaki",cari:"Tempat pejalan kaki menyeberang",aksi:"Kurangi kecepatan dan berhenti jika ada pejalan kaki yang akan atau sedang menyeberang."},
+  en_:{nama:"Zebra crossing",arti:"Pedestrian crossing",cari:"Where pedestrians cross the road",aksi:"Slow down and stop if a pedestrian is about to cross or is crossing."}},
+ {id:"henti",gambar:R(0,52,120,12),
+  id_:{nama:"Garis henti",arti:"Tempat kendaraan berhenti di persimpangan atau lampu lalu lintas",cari:"Kamu harus berhenti di belakang garis ini saat lampu merah",aksi:"Berhenti sebelum garis, jangan sampai roda depan melewatinya."},
+  en_:{nama:"Stop line",arti:"Where vehicles stop at an intersection or traffic light",cari:"You must stop behind this line at a red light",aksi:"Stop before the line; do not let your front wheels cross it."}},
+ {id:"panah",gambar:`<polygon points="60,12 84,52 68,52 68,106 52,106 52,52 36,52" fill="#f6f5ef"/>`,
+  id_:{nama:"Panah arah",arti:"Arah gerak yang diperbolehkan pada lajur tersebut",cari:"Menunjukkan arah yang boleh diikuti pada lajur ini",aksi:"Pilih lajur sesuai tujuan sebelum persimpangan, lalu ikuti arah panahnya."},
+  en_:{nama:"Direction arrow",arti:"The direction allowed from that lane",cari:"Shows the direction you may follow from this lane",aksi:"Choose your lane before the intersection, then follow the arrow."}},
+ {id:"kotak",gambar:`<rect x="14" y="22" width="92" height="76" fill="none" stroke="#f2b705" stroke-width="6"/><path d="M14 22L106 98M106 22L14 98" stroke="#f2b705" stroke-width="6"/>`,
+  id_:{nama:"Kotak kuning",arti:"Dilarang berhenti di area ini, agar persimpangan tidak terhalang",cari:"Kamu tidak boleh berhenti di dalam area ini",aksi:"Masuk hanya jika jalur di depan sudah lega. Jangan berhenti di tengah kotak."},
+  en_:{nama:"Yellow box junction",arti:"Do not stop in this area, so the intersection stays clear",cari:"You must not stop inside this area",aksi:"Enter only if the road ahead is clear. Never stop in the middle of the box."}}
+];
+const T=(m,k)=>(L==="en"?m.en_:m.id_)[k];
+const svg=m=>`<svg viewBox="0 0 120 120" role="img" aria-label="${T(m,"nama")}"><rect width="120" height="120" fill="#262a30"/>${m.gambar}</svg>`;
+const pilih=(a,n)=>[...a].sort(()=>Math.random()-.5).slice(0,n);
+const $=s=>document.querySelector(s);
+const app=$("#app");
+
+/* ============ KUIS AKHIR (kuis milikmu / your quiz) ============ */
+const KUIS=[
+{a:1,en:{q:"A white dashed line (garis putus-putus) in the middle of the road means:",o:["You must stop","You may overtake when it is safe","Overtaking is forbidden","Parking is allowed"],h:"Dashed = the road is 'open'. Think of a line you are allowed to cross."},
+ id:{q:"Garis putih putus-putus di tengah jalan berarti:",o:["Kamu harus berhenti","Kamu boleh mendahului jika aman","Dilarang mendahului","Boleh parkir"],h:"Putus-putus = jalan 'terbuka'. Bayangkan garis yang boleh dilintasi."}},
+{a:0,en:{q:"A solid center line (garis utuh) means:",o:["Overtaking/crossing is prohibited","Speed limit ahead","Pedestrian crossing","Lane is for buses"],h:"Solid = a wall. You are not supposed to cross it."},
+ id:{q:"Garis utuh di tengah jalan berarti:",o:["Dilarang mendahului/melintasi","Batas kecepatan di depan","Penyeberangan pejalan kaki","Lajur khusus bus"],h:"Utuh = seperti tembok. Kamu tidak boleh melintasinya."}},
+{a:1,en:{q:"A double solid center line means:",o:["Two-way bicycle lane","Crossing it is prohibited in both directions","Slow down only","Drivers may overtake freely"],h:"Two walls are stricter than one."},
+ id:{q:"Garis ganda utuh di tengah jalan berarti:",o:["Jalur sepeda dua arah","Dilarang melintasi dari kedua arah","Hanya perlu memperlambat","Pengemudi bebas mendahului"],h:"Dua tembok lebih ketat dari satu."}},
+{a:1,en:{q:"Wide white stripes across the road (zebra cross) are for:",o:["Motorbike parking","Pedestrian crossing","Racing start","Bus stop"],h:"Named after an animal with stripes."},
+ id:{q:"Garis-garis putih lebar melintang di jalan (zebra cross) digunakan untuk:",o:["Parkir motor","Penyeberangan pejalan kaki","Garis start balapan","Halte bus"],h:"Dinamai dari hewan yang berbelang."}},
+{a:2,en:{q:"A solid white line across your lane at an intersection (stop line) means:",o:["Speed up","Honk your horn","Stop behind it when required","Turn around"],h:"It marks where your vehicle's front must stay."},
+ id:{q:"Garis putih utuh melintang di lajurmu pada persimpangan (garis henti) berarti:",o:["Percepat laju","Bunyikan klakson","Berhenti di belakangnya saat diwajibkan","Putar balik"],h:"Garis ini menandai batas depan kendaraanmu."}},
+{a:0,en:{q:"A yellow box (yellow box junction) at an intersection means:",o:["Don't stop inside it; enter only if you can exit","Free parking","Taxi pickup","Motorbikes only"],h:"Blocking it causes traffic jams."},
+ id:{q:"Kotak kuning di persimpangan berarti:",o:["Jangan berhenti di dalamnya; masuk hanya jika bisa keluar","Parkir gratis","Tempat jemput taksi","Khusus sepeda motor"],h:"Menghalanginya menyebabkan kemacetan."}},
+{a:1,en:{q:"Arrows painted in a lane show:",o:["Weather direction","The direction(s) you may go from that lane","Distance to destination","Parking spots"],h:"They tell you where that lane leads."},
+ id:{q:"Panah yang dicat di lajur menunjukkan:",o:["Arah cuaca","Arah yang boleh kamu tuju dari lajur itu","Jarak ke tujuan","Tempat parkir"],h:"Panah memberi tahu ke mana lajur itu menuju."}},
+{a:2,en:{q:"A solid line on your side with a dashed line on the other side: who may overtake?",o:["Both sides","Neither side","Only the side with the dashed line","Only the side with the solid line"],h:"Look at which line is closest to you."},
+ id:{q:"Garis utuh di sisimu dan garis putus-putus di sisi lain: siapa yang boleh mendahului?",o:["Kedua sisi","Tidak ada","Hanya sisi dengan garis putus-putus","Hanya sisi dengan garis utuh"],h:"Lihat garis mana yang paling dekat denganmu."}},
+{a:1,en:{q:"Diagonal stripes (chevron/garis serong) painted on the road mean:",o:["Fast lane","Area vehicles should not enter","Pedestrians only","Loading zone"],h:"It is a buffer or separation area, not a lane."},
+ id:{q:"Garis serong (chevron) yang dicat di jalan berarti:",o:["Lajur cepat","Area yang sebaiknya tidak dimasuki kendaraan","Khusus pejalan kaki","Zona bongkar muat"],h:"Ini area pemisah, bukan lajur."}},
+{a:1,en:{q:"Small reflective road studs (paku jalan) are used to:",o:["Slow down trucks","Show lane edges at night or in fog","Mark parking","Count vehicles"],h:"Reflective = visibility."},
+ id:{q:"Paku jalan kecil yang memantulkan cahaya digunakan untuk:",o:["Memperlambat truk","Menunjukkan tepi lajur saat malam atau berkabut","Menandai parkir","Menghitung kendaraan"],h:"Memantulkan cahaya = terlihat jelas."}}
+];
+
+/* ============ NAV + TOGGLE ============ */
+const TABK=["jelajah","sim","cari","kuis"];
+function chrome(){
+  const s=S();document.documentElement.lang=L;document.title=s.title;
+  $("#h1").textContent=s.title;$("#tag").textContent=s.tag;$("#foot").textContent=s.foot;
+  $("#nav").innerHTML=TABK.map((k,i)=>`<button data-t="${k}" class="${k===tab?"on":""}">${s.tabs[i]}</button>`).join("");
+  document.querySelectorAll(".lang button").forEach(b=>b.classList.toggle("on",b.dataset.l===L));
+}
+$("#nav").onclick=e=>{const t=e.target.dataset.t;if(t)go(t)};
+document.querySelector(".lang").onclick=e=>{const l=e.target.dataset.l;if(!l||l===L)return;L=l;try{localStorage.setItem("lang",l)}catch(x){}go(tab,true)};
+function go(t,keep){tab=t;chrome();({jelajah,sim,cari,kuis})[t]();if(!keep)window.scrollTo(0,0)}
+
+/* ============ 1. JELAJAHI ============ */
+function jelajah(){
+  const s=S();
+  app.innerHTML=`<h2>${s.jT}</h2><p class="sub">${s.jS}</p>
+  <div class="grid">${MARKA.map((m,i)=>`<button class="tile" data-i="${i}">${svg(m)}<span>${T(m,"nama")}</span></button>`).join("")}</div>
+  <div id="detail"></div>`;
+  app.querySelector(".grid").onclick=e=>{
+    const b=e.target.closest(".tile");if(!b)return;
+    app.querySelectorAll(".tile").forEach(t=>t.classList.remove("sel"));b.classList.add("sel");
+    const m=MARKA[b.dataset.i];
+    $("#detail").innerHTML=`<div class="panel"><h3>${T(m,"nama")}</h3><p>${T(m,"arti")}.</p><div class="aksi"><b>${s.todo}</b> ${T(m,"aksi")}</div></div>`;
+    $("#detail").scrollIntoView({behavior:"smooth",block:"nearest"});
+  };
+}
+
+/* ============ 2. SIMULATOR ============ */
+function sim(){
+  const s=S();const urut=pilih(MARKA,MARKA.length);let n=0,skor=0;
+  function tampil(){
+    if(n>=urut.length){
+      app.innerHTML=`<div class="panel"><h3>${s.tripDone}</h3><div class="big">${skor} / ${urut.length}</div><p>${skor===urut.length?s.perfect:s.retry}</p><button class="next" id="ulang">${s.again}</button></div>`;
+      $("#ulang").onclick=sim;return;
+    }
+    const m=urut[n],opsi=pilih([m,...pilih(MARKA.filter(x=>x!==m),2)],3);
+    app.innerHTML=`<h2>${s.sT}</h2><p class="sub">${s.sS}</p>
+    <div class="bar"><i style="width:${n/urut.length*100}%"></i></div>
+    <div class="scene">${svg(m)}<div class="opts">${opsi.map(o=>`<button class="opt" data-id="${o.id}">${T(o,"arti")}</button>`).join("")}</div></div><div id="fb"></div>`;
+    app.querySelector(".opts").onclick=e=>{
+      const b=e.target.closest(".opt");if(!b||b.disabled)return;
+      const benar=b.dataset.id===m.id;if(benar)skor++;
+      app.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(x.dataset.id===m.id)x.classList.add("ok")});
+      if(!benar)b.classList.add("no");
+      $("#fb").innerHTML=`<div class="panel"><div class="fb ${benar?"good":"bad"}">${benar?s.ok:s.no}${s.itis(T(m,"nama").toLowerCase())}</div><div class="aksi"><b>${s.todo}</b> ${T(m,"aksi")}</div><button class="next" id="lanjut">${n+1<urut.length?s.nd:s.sr}</button></div>`;
+      $("#lanjut").onclick=()=>{n++;tampil()};
+    };
+  }
+  tampil();
+}
+
+/* ============ 3. CARI MARKA ============ */
+function cari(){
+  const s=S();const urut=pilih(MARKA,6);let n=0,skor=0;
+  function tampil(){
+    if(n>=urut.length){
+      app.innerHTML=`<div class="panel"><h3>${s.fin}</h3><div class="big">${skor} / ${urut.length}</div><button class="next" id="ulang">${s.pa}</button></div>`;
+      $("#ulang").onclick=cari;return;
+    }
+    const m=urut[n],opsi=pilih([m,...pilih(MARKA.filter(x=>x!==m),3)],4);
+    app.innerHTML=`<h2>${s.cT}</h2><p class="sub">${s.cS}</p><div class="bar"><i style="width:${n/urut.length*100}%"></i></div>
+    <div class="panel" style="margin:0 0 16px"><b>${T(m,"cari")}.</b></div>
+    <div class="grid">${opsi.map(o=>`<button class="tile" data-id="${o.id}">${svg(o)}</button>`).join("")}</div><div id="fb"></div>`;
+    app.querySelector(".grid").onclick=e=>{
+      const b=e.target.closest(".tile");if(!b||b.disabled)return;
+      const benar=b.dataset.id===m.id;if(benar)skor++;
+      app.querySelectorAll(".tile").forEach(x=>{x.disabled=true;if(x.dataset.id===m.id)x.classList.add("ok")});
+      if(!benar)b.classList.add("no");
+      $("#fb").innerHTML=`<div class="panel"><div class="fb ${benar?"good":"bad"}">${benar?s.ok:s.no}${s.ans(T(m,"nama"))}</div><button class="next" id="lanjut">${n+1<urut.length?s.nq:s.sr}</button></div>`;
+      $("#lanjut").onclick=()=>{n++;tampil()};
+    };
+  }
+  tampil();
+}
+
+/* ============ 4. KUIS AKHIR ============ */
+function kuis(){
+  const s=S();let n=0,skor=0,done=false,hint=false,sel=null;
+  function tampil(){
+    if(n>=KUIS.length){
+      const msg=skor<50?s.m[0]:skor<80?s.m[1]:s.m[2];
+      app.innerHTML=`<div class="panel"><h3>${s.res}</h3><div class="big">${skor.toFixed(1)} / 100.0</div><p>${msg}</p><button class="next" id="ulang">${s.rs}</button></div>`;
+      $("#ulang").onclick=kuis;return;
+    }
+    const k=KUIS[n],c=k[L];
+    app.innerHTML=`<h2>${s.kT}</h2><p class="sub">${s.qn(n+1,KUIS.length)} &nbsp;|&nbsp; ${s.sc}: ${skor.toFixed(1)}</p><div class="bar"><i style="width:${n/KUIS.length*100}%"></i></div>
+    <div class="panel" style="margin:0 0 14px"><b>${c.q}</b></div>
+    <div class="opts">${c.o.map((o,i)=>`<button class="opt ${done?(i===k.a?"ok":i===sel?"no":""):""}" data-i="${i}" ${done?"disabled":""}>${o}</button>`).join("")}</div>
+    ${hint?`<div class="aksi">\u{1F4A1} ${c.h}</div>`:""}
+    ${done?`<div class="fb ${sel===k.a?"good":"bad"}">${sel===k.a?s.plus:s.wrongR(c.o[k.a])}</div>`:""}
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+    ${done?`<button class="next" id="lanjut" style="margin:0">${n+1<KUIS.length?s.nx:s.seeRes}</button>`:`<button class="opt" id="hb" style="width:auto;margin:0">${s.hint}</button>`}
+    <button class="opt" id="rs" style="width:auto;margin:0">${s.rs}</button></div>`;
+    app.querySelector(".opts").onclick=e=>{const b=e.target.closest(".opt");if(!b||done)return;sel=+b.dataset.i;done=true;if(sel===k.a)skor+=10;tampil()};
+    const hb=$("#hb");if(hb)hb.onclick=()=>{hint=true;tampil()};
+    const nx=$("#lanjut");if(nx)nx.onclick=()=>{n++;done=false;hint=false;sel=null;tampil()};
+    $("#rs").onclick=kuis;
+  }
+  tampil();
+}
+
+go("jelajah");
+</script>
+</body>
+</html>
